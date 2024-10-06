@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5 pt-5">
+    <h1 class="text-center mb-4">Crawl Results</h1>
+    <div class="card mb-4">
+        <div class="card-header bg-success text-white">
+            <h4>Analytics</h4>
+        </div>
+        <div class="card-body">
+            <p><strong>Pages Crawled:</strong> {{ analytics.total_pages }}</p>
+            <p><strong>Items Found:</strong> {{ analytics.total_matches }}</p>
+            <p><strong>Total Links Discovered:</strong> {{ analytics.total_links }}</p>
+            <p><strong>Crawl Duration:</strong> {{ analytics.duration | round(2) }} seconds</p>
+        </div>
+    </div>
+    <!-- Button to Open Matched Items Modal -->
+    <div class="mt-4 mb-4 text-center">
+        <button type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#matchesModal">
+            View Matched Items
+        </button>
+    </div>
+    <!-- Matched Items Modal -->
+    <div class="modal fade" id="matchesModal" tabindex="-1" aria-labelledby="matchesModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Matched Items</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <!-- Table to display matched items -->
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th scope="col">URL</th>
+                  <th scope="col">Matches</th>
+                  <th scope="col">Date</th>
+                  <th scope="col">Summary</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for result in results %}
+                <tr>
+                  <td><a href="{{ result.url }}" target="_blank">{{ result.url }}</a></td>
+                  <td>{{ result.matches | join(', ') }}</td>
+                  <td>{{ result.date or 'Not found' }}</td>
+                  <td>{{ result.summary }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          <div class="modal-footer">
+            <a href="{{ url_for('download', file_type='matches') }}" class="btn btn-secondary">Download Matched Items</a>
+            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Download Buttons -->
+    <div class="mt-4">
+        <h3>Download CSV Files</h3>
+        <a href="{{ url_for('download', file_type='domains') }}" class="btn btn-outline-secondary me-2">Unique Domains</a>
+        <a href="{{ url_for('download', file_type='urls') }}" class="btn btn-outline-secondary me-2">Crawled URLs</a>
+        <a href="{{ url_for('download', file_type='dates') }}" class="btn btn-outline-secondary me-2">Release Dates</a>
+        <a href="{{ url_for('download', file_type='matches') }}" class="btn btn-outline-secondary">Matched Items</a>
+    </div>
+    <div class="mt-5 text-center">
+        <a href="{{ url_for('index') }}" class="btn btn-primary btn-lg">Start New Crawl</a>
+    </div>
+</div>
+{% endblock %}

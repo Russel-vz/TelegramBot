@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5 pt-5">
+    <div class="row justify-content-center align-items-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header text-center bg-primary text-white">
+                    <h3>Start a New Crawl</h3>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
+                        <div class="mb-3">
+                            {{ form.url.label(class="form-label") }}
+                            {{ form.url(class="form-control") }}
+                        </div>
+                        <div class="mb-3">
+                            {{ form.words.label(class="form-label") }}
+                            {{ form.words(class="form-control", rows="3") }}
+                            <small class="form-text text-muted">{{ form.words.description }}</small>
+                        </div>
+                        <div class="mb-3">
+                            {{ form.exclude_urls.label(class="form-label") }}
+                            {{ form.exclude_urls(class="form-control", rows="2") }}
+                            <small class="form-text text-muted">{{ form.exclude_urls.description }}</small>
+                        </div>
+                        <div class="mb-3">
+                            {{ form.depth.label(class="form-label") }}
+                            {{ form.depth(class="form-control") }}
+                        </div>
+                        <div class="form-check mb-2">
+                            {{ form.case_sensitive(class="form-check-input") }}
+                            {{ form.case_sensitive.label(class="form-check-label") }}
+                        </div>
+                        <div class="form-check mb-4">
+                            {{ form.exact_match(class="form-check-input") }}
+                            {{ form.exact_match.label(class="form-check-label") }}
+                        </div>
+                        <div class="d-grid gap-2">
+                            {{ form.submit(class="btn btn-primary btn-lg") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

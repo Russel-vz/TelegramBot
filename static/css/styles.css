@@ -1,0 +1,98 @@
+/* static/css/styles.css */
+
+/* General Styles */
+body {
+    /* Background image moved to base.html */
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    color: #343a40;
+    margin-top: 56px; /* Adjust for fixed navbar height */
+}
+
+.navbar-brand {
+    font-weight: bold;
+}
+
+.card {
+    background-color: rgba(255, 255, 255, 0.9);
+}
+
+.footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+}
+
+/* Form Styles */
+.form-control {
+    border-radius: 0;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+    border-radius: 0;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #004085;
+}
+
+/* Accordion Styles */
+.accordion-button {
+    background-color: #f8f9fa;
+}
+
+.accordion-button:not(.collapsed) {
+    color: #fff;
+    background-color: #007bff;
+}
+
+.accordion-item {
+    border: none;
+}
+
+/* Styles for the matched items box */
+#matched-items-container {
+    max-height: 300px; /* Adjust the height as needed */
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    padding: 15px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    margin-top: 20px;
+}
+
+/* Style the list items */
+#matched-items .list-group-item {
+    margin-bottom: 10px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+#matched-items .list-group-item a {
+    word-break: break-all;
+    color: #007bff;
+    text-decoration: none;
+}
+
+#matched-items .list-group-item a:hover {
+    text-decoration: underline;
+}
+
+/* Optional: Style the scrollbar */
+#matched-items-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+#matched-items-container::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+    border-radius: 4px;
+}
+
+#matched-items-container::-webkit-scrollbar-thumb:hover {
+    background-color: #aaa;
+}

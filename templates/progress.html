@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5 pt-5">
+    <h3 class="text-center">Crawling in Progress...</h3>
+    <div id="progress-info" class="mt-4 text-center">
+        <div class="spinner-border text-primary mt-4" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-3">This may take a few moments. Please wait.</p>
+    </div>
+    <h4 class="mt-5">Matched Items Found So Far:</h4>
+    <div id="matched-items-container">
+        <div id="matched-items">
+            <!-- Matched items will be displayed here -->
+            <p>No matches found yet.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function getProgress() {
+        fetch('{{ url_for("progress_status") }}')
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'Completed') {
+                    window.location.href = '{{ url_for("results") }}';
+                } else {
+                    let progressInfo = `
+                        <p><strong>Pages Crawled:</strong> ${data.pages_crawled}</p>
+                        <p><strong>Pages Remaining:</strong> ${data.pages_to_visit}</p>
+                        <p><strong>Total Matches Found:</strong> ${data.total_matches}</p>
+                    `;
+                    document.getElementById('progress-info').innerHTML = progressInfo;
+                }
+            })
+            .catch(error => console.error('Error fetching progress:', error));
+    }
+
+    function getMatchedItems() {
+        fetch('{{ url_for("matched_items") }}')
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'No active crawl.') {
+                    return;
+                }
+                const items = data.matched_items;
+                if (items.length === 0) {
+                    document.getElementById('matched-items').innerHTML = '<p>No matches found yet.</p>';
+                } else {
+                    let itemsHtml = '<ul class="list-group">';
+                    items.forEach(item => {
+                        itemsHtml += `
+                            <li class="list-group-item">
+                                <strong>URL:</strong> <a href="${item.url}" target="_blank">${item.url}</a><br>
+                                <strong>Matches:</strong> ${item.matches.join(', ')}<br>
+                                <strong>Date:</strong> ${item.date || 'Not found'}<br>
+                                <strong>Summary:</strong> ${item.summary}
+                            </li>
+                        `;
+                    });
+                    itemsHtml += '</ul>';
+                    document.getElementById('matched-items').innerHTML = itemsHtml;
+                }
+            })
+            .catch(error => console.error('Error fetching matched items:', error));
+    }
+
+    // Polling intervals
+    setInterval(getProgress, 2000);       // Poll progress every 2 seconds
+    setInterval(getMatchedItems, 3000);   // Poll matched items every 3 seconds
+</script>
+{% endblock %}
