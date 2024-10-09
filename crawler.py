@@ -59,6 +59,23 @@ class WebCrawler:
         # Shared list to store matched items
         self.matched_items = matched_items if matched_items is not None else []
 
+        # Event to control pausing and resuming
+        self.pause_event = asyncio.Event()
+        self.pause_event.set()  # Start in running state
+
+    def pause(self):
+        self.pause_event.clear()
+        logger.info("Crawler paused.")
+
+    def resume(self):
+        self.pause_event.set()
+        logger.info("Crawler resumed.")
+
+    def stop(self):
+        self.stop_crawling = True
+        self.pause_event.set()  # Ensure any waiting workers can exit
+        logger.info("Crawler stopped.")
+
     async def crawl(self):
         workers = []
         try:
@@ -68,13 +85,13 @@ class WebCrawler:
                 await self.to_visit.put((self.start_url, 0))
                 self.update_progress()  # Initialize progress
                 workers = [asyncio.create_task(self.worker()) for _ in range(10)]  # Adjust the number of workers as needed
-                await self.to_visit.join()
+                while not self.stop_crawling and (not self.to_visit.empty() or any(not w.done() for w in workers)):
+                    await asyncio.sleep(0.1)
         except Exception as e:
             logger.error(f"Error in crawl method: {str(e)}")
         finally:
-            for _ in workers:
-                await self.to_visit.put(None)
-            await asyncio.gather(*workers, return_exceptions=True)
+            for w in workers:
+                w.cancel()
             duration = time.time() - self.start_time
 
             # Ensure 'duration' is always set
@@ -90,16 +107,21 @@ class WebCrawler:
     async def worker(self):
         try:
             while not self.stop_crawling:
+                await self.pause_event.wait()  # Wait if paused
+                if self.stop_crawling:
+                    break
+                if self.to_visit.empty():
+                    await asyncio.sleep(0.1)
+                    continue
                 item = await self.to_visit.get()
                 if item is None:
                     self.to_visit.task_done()
                     break
                 url, depth = item
-                if self.stop_crawling:
-                    self.to_visit.task_done()
-                    break
                 await self.process_url(url, depth)
                 self.to_visit.task_done()
+        except asyncio.CancelledError:
+            pass  # Handle cancellation
         except Exception as e:
             logger.error(f"Error in worker: {str(e)}")
 
