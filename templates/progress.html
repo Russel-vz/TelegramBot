@@ -8,6 +8,18 @@
         </div>
         <p class="mt-3">This may take a few moments. Please wait.</p>
     </div>
+    <div class="text-center mt-4">
+        <button id="stop-button" class="btn btn-danger me-2" onclick="stopCrawl()">Stop</button>
+        <button id="continue-button" class="btn btn-success" onclick="continueCrawl()" style="display:none;">Continue</button>
+    </div>
+    <!-- Download Buttons (Initially Hidden) -->
+    <div id="download-buttons" class="mt-4" style="display: none;">
+        <h3>Download CSV Files</h3>
+        <a href="{{ url_for('download', file_type='domains') }}" class="btn btn-outline-secondary me-2">Unique Domains</a>
+        <a href="{{ url_for('download', file_type='urls') }}" class="btn btn-outline-secondary me-2">Crawled URLs</a>
+        <a href="{{ url_for('download', file_type='dates') }}" class="btn btn-outline-secondary me-2">Release Dates</a>
+        <a href="{{ url_for('download', file_type='matches') }}" class="btn btn-outline-secondary">Matched Items</a>
+    </div>
     <h4 class="mt-5">Matched Items Found So Far:</h4>
     <div id="matched-items-container">
         <div id="matched-items">
@@ -28,11 +40,21 @@
                     window.location.href = '{{ url_for("results") }}';
                 } else {
                     let progressInfo = `
+                        <p><strong>Status:</strong> ${data.status}</p>
                         <p><strong>Pages Crawled:</strong> ${data.pages_crawled}</p>
                         <p><strong>Pages Remaining:</strong> ${data.pages_to_visit}</p>
                         <p><strong>Total Matches Found:</strong> ${data.total_matches}</p>
                     `;
                     document.getElementById('progress-info').innerHTML = progressInfo;
+
+                    // Show download buttons if paused
+                    if (data.status === 'Paused') {
+                        document.getElementById('download-buttons').style.display = 'block';
+                        document.getElementById('continue-button').style.display = 'inline-block';
+                        document.getElementById('stop-button').style.display = 'none';
+                    } else {
+                        document.getElementById('download-buttons').style.display = 'none';
+                    }
                 }
             })
             .catch(error => console.error('Error fetching progress:', error));
@@ -65,6 +87,38 @@
                 }
             })
             .catch(error => console.error('Error fetching matched items:', error));
+    }
+
+    function stopCrawl() {
+        fetch('{{ url_for("stop_crawl") }}', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'}
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log(data.status);
+            document.getElementById('stop-button').style.display = 'none';
+            document.getElementById('continue-button').style.display = 'inline-block';
+            // Show download buttons when paused
+            document.getElementById('download-buttons').style.display = 'block';
+        })
+        .catch(error => console.error('Error stopping crawl:', error));
+    }
+
+    function continueCrawl() {
+        fetch('{{ url_for("continue_crawl") }}', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'}
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log(data.status);
+            document.getElementById('stop-button').style.display = 'inline-block';
+            document.getElementById('continue-button').style.display = 'none';
+            // Hide download buttons when resuming
+            document.getElementById('download-buttons').style.display = 'none';
+        })
+        .catch(error => console.error('Error continuing crawl:', error));
     }
 
     // Polling intervals
